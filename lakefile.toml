@@ -1,0 +1,24 @@
+name = "euclid-primes"
+version = "0.1.0"
+keywords = ["math"]
+defaultTargets = ["EuclidPrimes"]
+
+[leanOptions]
+pp.unicode.fun = true # pretty-prints `fun a ↦ b`
+relaxedAutoImplicit = false
+weak.linter.mathlibStandardSet = true
+maxSynthPendingDepth = 3
+
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
+rev = "v4.32.2"
+
+# Provides `lake exe checkdecls`, which CI runs over blueprint/lean_decls to
+# check that every declaration the blueprint claims to formalize really exists.
+[[require]]
+name = "checkdecls"
+git = "https://github.com/PatrickMassot/checkdecls.git"
+
+[[lean_lib]]
+name = "EuclidPrimes"

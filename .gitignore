@@ -1,0 +1,27 @@
+# Lake build artifacts
+.lake/
+
+# Archon state directory
+.archon/
+/.lake
+
+# leandag cache (derived from the blueprint and the Lean sources)
+.leandag/
+
+# Blueprint build output: `leanblueprint web` / `leanblueprint pdf`
+blueprint/web/
+blueprint/print/
+blueprint/lean_decls
+blueprint/src/*.paux
+blueprint/src/*.aux
+blueprint/src/*.log
+
+# Jekyll output for the home page, plus the blueprint and API docs that CI
+# copies into it
+home_page/_site/
+home_page/.jekyll-cache/
+home_page/.jekyll-metadata
+home_page/vendor/
+home_page/blueprint/
+home_page/blueprint.pdf
+home_page/docs/

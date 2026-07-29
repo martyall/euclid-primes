@@ -1,0 +1,233 @@
+\chapter{Existence of a prime factorisation}
+\label{ch:factorization}
+
+\section{The shape of the statement}
+
+The source states factorisation in the classical exponent form,
+$n = \prod_{i=1}^{k} p_i^{e_i}$ with the $p_i$ \emph{distinct} and $e_i > 0$.
+This chapter proves it in \emph{both} shapes, and the distinction is one of
+working convenience only.
+
+The induction is run on a \textbf{list of primes whose product is $n$}, with
+multiplicity recorded by repetition rather than by an exponent
+(Theorem~\ref{thm:exists_factorization}). That is the form the argument wants:
+its inductive step is literally list concatenation, whereas merging two
+exponent-indexed families would require adding exponents at shared primes before
+the induction has any grouping machinery available.
+
+The source's exponent form is then recovered in \S\ref{sec:exponent_form} by
+grouping the list by value: the distinct primes are the \emph{distinct} values
+occurring in the list, and each exponent is the multiplicity with which its prime
+occurs. Both statements are therefore project theorems; neither is asserted as
+``equivalent up to an unproved translation''.
+
+Only Chapter~\ref{ch:infinitude} consumes this chapter, and it needs neither
+distinctness nor exponents --- it needs a single prime divisor
+(Corollary~\ref{cor:exists_prime_dvd}). The exponent form is proved because the
+source names it as a theorem, not because anything downstream calls it.
+
+Uniqueness of the factorisation is deliberately \emph{not} part of this project.
+The source itself flags it as unnecessary, and nothing in
+Chapter~\ref{ch:infinitude} appeals to it.
+
+\section{Reducibility produces two non-unit factors}
+
+\begin{lemma}[unfolding the failure of irreducibility]
+  \leanok
+  \label{lem:exists_factor_of_not_irreducible}
+  \lean{EuclidPrimes.exists_factor_of_not_isIrreducible}
+  \uses{def:is_irreducible}
+  Let $n \in \NN$ with $1 < n$, and suppose $\Irr{n}$ fails. Then there exist
+  $a, b \in \NN$ with $n = a b$, $a \neq 1$ and $b \neq 1$.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  $\Irr{n}$ is the conjunction of $1 < n$ with the factorisation clause. Since
+  $1 < n$ holds by hypothesis, it is the factorisation clause that fails: there
+  are $a, b$ with $n = a b$, $n \neq a$ and $n \neq b$.
+
+  It remains to convert ``$n \neq a$ and $n \neq b$'' into ``$a \neq 1$ and
+  $b \neq 1$''. If $a = 1$ then $n = 1 \cdot b = b$, contradicting $n \neq b$;
+  so $a \neq 1$. If $b = 1$ then $n = a \cdot 1 = a$, contradicting $n \neq a$;
+  so $b \neq 1$.
+\end{proof}
+
+\section{The factorisation theorem}
+
+\begin{theorem}[existence of a prime factorisation]
+  \leanok
+  \label{thm:exists_factorization}
+  \lean{EuclidPrimes.exists_factorization}
+  \uses{def:is_prime, cor:prime_iff_irreducible, lem:exists_factor_of_not_irreducible, lem:one_lt_factor, lem:factor_lt}
+  % SOURCE: [euclid-notes], the first `theroem:` (read from references/euclid-infinitude-of-primes.md)
+  % SOURCE QUOTE: "theroem: For any natural number n > 1, there exists (p_1, e_1), ... (p_k, e_k) with p_i distict primes and e_i > 0 forall i
+  % such that n = \Product_{1}^{k} p_i ^ e_i"
+  \textit{Source: euclid-infinitude-of-primes.md, first \texttt{theroem:} (restated in list form; see \S1).}
+  For every $n \in \NN$ with $1 < n$ there is a finite list
+  $\ell = [q_1, \dots, q_k]$ of natural numbers such that every $q_i$ satisfies
+  $\Prm{q_i}$ and
+  \[
+    \prod_{i=1}^{k} q_i = n .
+  \]
+\end{theorem}
+% SOURCE QUOTE PROOF: "proof: induction on n
+% base case: n = 2, immediate
+% induction case, suppose true for 2 ... n
+% If n + 1 is prime, then were done. Otherwise n + 1 is irreducible, so (n + 1) = a * b with niether a nor b eqaual to 1.
+% Then a < n + 1 and b < n + 1, so we can apply the induction hypothesis to both a and b. Combine their factorizations to get the result."
+\begin{proof}
+  \uses{cor:prime_iff_irreducible, lem:exists_factor_of_not_irreducible, lem:one_lt_factor, lem:factor_lt}
+  \leanok
+  Two remarks on the source proof before we begin. First, its case split reads
+  ``\texttt{If n + 1 is prime, then were done. Otherwise n + 1 is irreducible}'',
+  which inverts the intended dichotomy: the ``otherwise'' branch is the one where
+  $n+1$ is \emph{not} irreducible. We split on irreducibility and use
+  Corollary~\ref{cor:prime_iff_irreducible} to move to primality. Second, the
+  source's ``base case $n = 2$'' plus ``suppose true for $2 \dots n$'' is a
+  strong induction; we run it as such, with no separate base case --- the case
+  analysis below already covers $n = 2$, since $2$ is irreducible.
+
+  We argue by strong induction on $n$: assume the statement for every $m < n$
+  with $1 < m$, and prove it for $n$ with $1 < n$. Split on whether $\Irr{n}$
+  holds.
+
+  \paragraph{Case $\Irr{n}$.} By Corollary~\ref{cor:prime_iff_irreducible},
+  $\Prm{n}$. Take $\ell := [n]$. Every member of $\ell$ is prime, and its product
+  is $n$.
+
+  \paragraph{Case $\lnot\,\Irr{n}$.} By
+  Lemma~\ref{lem:exists_factor_of_not_irreducible} there are $a, b$ with
+  $n = a b$, $a \neq 1$, $b \neq 1$. Then:
+  \begin{itemize}
+    \item $1 < a$ and $1 < b$, by Lemma~\ref{lem:one_lt_factor} applied to
+      $n = a b$ and to $n = b a$.
+    \item $a < n$ by Lemma~\ref{lem:factor_lt} applied to $n = a b$, and $b < n$
+      by the same lemma applied to $n = b a$.
+  \end{itemize}
+  So the induction hypothesis applies to both $a$ and $b$, yielding lists
+  $\ell_a$ and $\ell_b$ of primes with $\prod \ell_a = a$ and
+  $\prod \ell_b = b$. Take $\ell := \ell_a \mathbin{+\!\!+} \ell_b$. A member of
+  $\ell$ lies in $\ell_a$ or in $\ell_b$, hence is prime; and the product of a
+  concatenation is the product of the products, so
+  $\prod \ell = a b = n$.
+\end{proof}
+
+\section{Extracting a single prime divisor}
+
+Chapter~\ref{ch:infinitude} does not need the whole factorisation, only that
+every $n > 1$ has \emph{some} prime divisor. That is the theorem plus one
+observation: a list whose product exceeds $1$ cannot be empty.
+
+\begin{corollary}[every $n > 1$ has a prime divisor]
+  \leanok
+  \label{cor:exists_prime_dvd}
+  \lean{EuclidPrimes.exists_isPrime_dvd}
+  \uses{def:is_prime, thm:exists_factorization}
+  For every $n \in \NN$ with $1 < n$ there exists $p$ with $\Prm{p}$ and
+  $p \mid n$.
+\end{corollary}
+\begin{proof}
+  \uses{thm:exists_factorization}
+  \leanok
+  Take $\ell$ as in Theorem~\ref{thm:exists_factorization}, so all members of
+  $\ell$ are prime and $\prod \ell = n$. The list $\ell$ is non-empty: the
+  product of the empty list is $1$, whereas $\prod \ell = n > 1$. Let $p$ be its
+  first member. Then $\Prm{p}$ because $p \in \ell$, and $p \mid \prod \ell = n$
+  because any member of a list divides that list's product.
+\end{proof}
+
+\section{Recovering the source's exponent form}
+\label{sec:exponent_form}
+
+It remains to produce the statement the source actually names: a factorisation
+indexed by \emph{distinct} primes carrying strictly positive exponents. Nothing
+downstream needs it, but it is one of the source's theorems, so it is proved
+here rather than left as an informal remark about
+Theorem~\ref{thm:exists_factorization}.
+
+Distinctness is expressed by indexing the product over a finite \emph{set} of
+primes: a set has no repeated elements, so ``the $p_i$ are distinct'' becomes a
+property of the index rather than an extra hypothesis to carry. The exponents are
+given by a function $e$ on $\NN$, constrained only at the primes that actually
+occur; its values elsewhere are irrelevant to the product.
+
+\begin{theorem}[existence of a prime factorisation, exponent form]
+  \leanok
+  \label{thm:exists_factorization_pow}
+  \lean{EuclidPrimes.exists_factorization_pow}
+  \uses{def:is_prime, thm:exists_factorization}
+  % SOURCE: [euclid-notes], the first `theroem:` (read from references/euclid-infinitude-of-primes.md)
+  % SOURCE QUOTE: "theroem: For any natural number n > 1, there exists (p_1, e_1), ... (p_k, e_k) with p_i distict primes and e_i > 0 forall i
+  % such that n = \Product_{1}^{k} p_i ^ e_i"
+  \textit{Source: euclid-infinitude-of-primes.md, first \texttt{theroem:} (the
+  source's own exponent form; the list form is Theorem~\ref{thm:exists_factorization}).}
+  For every $n \in \NN$ with $1 < n$ there exist a finite set $S \subseteq \NN$
+  and a function $e : \NN \to \NN$ such that
+  \begin{itemize}
+    \item every $p \in S$ satisfies $\Prm{p}$,
+    \item $e(p) > 0$ for every $p \in S$, and
+    \item $\displaystyle\prod_{p \in S} p^{\,e(p)} = n$.
+  \end{itemize}
+\end{theorem}
+\begin{proof}
+  \uses{thm:exists_factorization}
+  \leanok
+  Let $\ell$ be a list of primes with $\prod \ell = n$, as supplied by
+  Theorem~\ref{thm:exists_factorization}, and regard $\ell$ as a finite
+  multiset --- the induction produced it in some order, but the order carries no
+  information here.
+
+  Take $S$ to be the set of \emph{distinct} values occurring in $\ell$, and for
+  each $p$ let $e(p)$ be the multiplicity of $p$ in $\ell$, i.e.\ the number of
+  positions of $\ell$ at which $p$ occurs. The three claims are then:
+
+  \begin{itemize}
+    \item \emph{Every element of $S$ is prime.} An element of $S$ occurs in
+      $\ell$, and every member of $\ell$ is prime.
+    \item \emph{Exponents are positive on $S$.} A value occurs in $\ell$ exactly
+      when its multiplicity is non-zero, so $p \in S$ gives $e(p) > 0$.
+    \item \emph{The product is $n$.} Collecting equal factors of a finite
+      product in a commutative monoid, the product of a multiset equals the
+      product, over its distinct values, of each value raised to its
+      multiplicity. Applied to $\ell$ this reads
+      $\prod_{p \in S} p^{\,e(p)} = \prod \ell = n$.
+  \end{itemize}
+
+  Note that $S$ is automatically non-empty, since an empty index set would give
+  product $1 \neq n$; the statement does not need to say so separately.
+\end{proof}
+
+\section{Uniqueness of the factorisation: deliberately out of scope}
+\label{sec:uniqueness_out_of_scope}
+
+The source continues past existence with two further named results --- a
+uniqueness theorem (``given a prime factorisation $n = \prod_1^k p_i^{e_i}$, it
+is unique up to ordering'') and a corollary combining existence with uniqueness.
+Neither is formalised here, and their absence is not an open gap. It is recorded
+in this chapter so that a reader comparing the development against the source
+does not have to guess.
+
+Two independent reasons:
+
+\begin{itemize}
+  \item \emph{It is not needed.} Nothing in the route to Euclid's theorem
+    consumes uniqueness. The infinitude argument
+    (Theorem~\ref{thm:not_exists_prime_list}) needs only that $m + 1$ has
+    \emph{some} prime divisor, which is
+    Corollary~\ref{cor:exists_prime_dvd}. The source's author reaches the same
+    conclusion in the notes themselves, heading the uniqueness theorem
+    % SOURCE: [euclid-notes], the heading above the second `theroem:` (read from references/euclid-infinitude-of-primes.md)
+    % SOURCE QUOTE: "## Note: I dont think we actually need this uniqueness"
+    \textit{``Note: I dont think we actually need this uniqueness''}.
+  \item \emph{It is excluded by directive.} Uniqueness of prime factorisation is
+    outside this project's stated scope, so it is not to be added and its absence
+    is not to be treated as unfinished work.
+\end{itemize}
+
+The source's closing corollary --- for every $n > 1$ there exist \emph{unique}
+distinct primes with positive exponents whose product is $n$ --- is therefore
+established here exactly in its existence half,
+Theorem~\ref{thm:exists_factorization_pow}; the uniqueness half is the excluded
+result above, not an oversight. Every other named result of the source, including
+each definition, is proved in this development from first principles.

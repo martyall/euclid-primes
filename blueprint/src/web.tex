@@ -1,0 +1,26 @@
+% This file makes the web version of the blueprint, built with
+% `leanblueprint web` (output in blueprint/web/).
+%
+% Note: macros/common.tex is *not* \input here — content.tex pulls it in
+% itself, so inputting it again would redefine every macro.
+
+\documentclass{report}
+
+\usepackage{amssymb, amsthm, amsmath}
+\usepackage{hyperref}
+\usepackage[showmore, dep_graph]{blueprint}
+
+\input{macros/theorems}
+\input{macros/web}
+
+\home{https://martyall.github.io/euclid-primes}
+\github{https://github.com/martyall/euclid-primes}
+\dochome{https://martyall.github.io/euclid-primes/docs}
+
+\title{Euclid's Theorem from First Principles}
+\author{Martin Allen}
+
+\begin{document}
+\maketitle
+\input{content}
+\end{document}

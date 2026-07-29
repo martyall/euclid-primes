@@ -1,0 +1,19 @@
+% Theorem environment declarations, shared by the web and print versions.
+%
+% This file is \input from the *preamble* of both web.tex and print.tex
+% (unlike macros/common.tex, which content.tex pulls in itself).
+% \newtheorem must run in the preamble, which is why these live here.
+%
+% The environment names are the ones plastexdepgraph looks for by default:
+% definition + lemma + proposition + theorem + corollary.
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[chapter]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{example}[theorem]{Example}

@@ -1,0 +1,74 @@
+name: Compile and deploy blueprint
+
+# Builds the paper (blueprint/) and the API documentation, then publishes both
+# to GitHub Pages:
+#
+#   https://martyall.github.io/euclid-primes/            landing page (home_page/)
+#   https://martyall.github.io/euclid-primes/blueprint/  blueprint, web version
+#   https://martyall.github.io/euclid-primes/blueprint.pdf
+#   https://martyall.github.io/euclid-primes/docs/       doc-gen4 API docs
+#
+# Pages must be configured once, by hand: Settings > Pages > Build and
+# deployment > Source > "GitHub Actions".
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch: # Allow deploying by hand from the Actions tab
+
+# Only one deploy at a time, and let a newer commit supersede an in-flight one.
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read # Read access to repository contents
+  pages: write # Write access to GitHub Pages
+  id-token: write # Required to upload the site to GitHub Pages
+
+jobs:
+  build_project:
+    name: Build and deploy blueprint
+    runs-on: ubuntu-latest
+    steps:
+      # A full TeX Live image plus Mathlib's oleans plus doc-gen4's output does
+      # not comfortably fit on a stock runner.
+      - name: Cleanup to free disk space
+        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # v1.3.1
+        with:
+          tool-cache: false
+          android: true
+          dotnet: false
+          haskell: false
+          large-packages: false
+          docker-images: false
+          swap-storage: false
+
+      - name: Checkout project
+        uses: actions/checkout@v5
+        with:
+          # doc-gen4 derives its "source" links from the git history, so the
+          # full history is needed for them to point at the right commit.
+          fetch-depth: 0
+
+      # Installs the pinned toolchain, restores the Mathlib olean cache and the
+      # GitHub Actions build cache, then runs `lake build`.
+      - name: Build project
+        uses: leanprover/lean-action@v1
+        with:
+          build: true
+          use-github-cache: true
+
+      # This single action does the rest:
+      #   * compiles blueprint/src/print.tex with xelatex   -> blueprint.pdf
+      #   * runs plasTeX over blueprint/src/web.tex          -> blueprint/
+      #   * checks every \lean{...} declaration exists (`lake exe checkdecls`)
+      #   * runs doc-gen4                                    -> docs/
+      #   * builds home_page/ with Jekyll and deploys to Pages
+      - name: Compile blueprint and documentation, deploy to Pages
+        uses: leanprover-community/docgen-action@main
+        with:
+          blueprint: true
+          homepage: home_page

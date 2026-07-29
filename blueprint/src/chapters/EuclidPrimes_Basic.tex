@@ -1,0 +1,293 @@
+\chapter{Definitions and elementary divisibility}
+\label{ch:basic}
+
+Everything in this project is built from the three definitions below. They are
+project-local by design: Mathlib's \texttt{Nat.Prime}, the generic
+\texttt{Irreducible}/\texttt{Prime} classes, and \texttt{Nat.gcd} are all out of
+bounds, because reproducing Euclid's development from first principles is the
+point of the project. Only elementary arithmetic and divisibility facts about
+$\NN$ and $\ZZ$ are taken as given.
+
+The informal source states each definition without the hypothesis $1 < p$. That
+omission makes the definitions unusable, so we restore the hypothesis; the
+discussion after Definition~\ref{def:is_irreducible} explains why.
+
+\section{The three predicates}
+
+\begin{definition}[prime]
+  \leanok
+  \label{def:is_prime}
+  \lean{EuclidPrimes.IsPrime}
+  % SOURCE: [euclid-notes], the first `def:` line (read from references/euclid-infinitude-of-primes.md)
+  % SOURCE QUOTE: "def: A natural number p is prime if p | a * b => p | a or p | b"
+  \textit{Source: euclid-infinitude-of-primes.md, first \texttt{def:} line.}
+  A natural number $p$ is \emph{prime}, written $\Prm{p}$, when
+  \[
+    1 < p \quad\text{and}\quad \forall a, b \in \NN,\ p \mid a b \implies p \mid a \ \text{or}\ p \mid b .
+  \]
+\end{definition}
+
+\begin{definition}[irreducible]
+  \leanok
+  \label{def:is_irreducible}
+  \lean{EuclidPrimes.IsIrreducible}
+  % SOURCE: [euclid-notes], the second `def:` line (read from references/euclid-infinitude-of-primes.md)
+  % SOURCE QUOTE: "def: A natural number p is irreduicble if p = a * b => p = a or p = b"
+  \textit{Source: euclid-infinitude-of-primes.md, second \texttt{def:} line.}
+  A natural number $p$ is \emph{irreducible}, written $\Irr{p}$, when
+  \[
+    1 < p \quad\text{and}\quad \forall a, b \in \NN,\ p = a b \implies p = a \ \text{or}\ p = b .
+  \]
+\end{definition}
+
+\paragraph{Why $1 < p$ is not optional.}
+The source drops the unit condition from both definitions, and the resulting
+predicates are false-friendly:
+\begin{itemize}
+  \item $p = 1$ satisfies the divisibility clause of
+    Definition~\ref{def:is_prime} (since $1$ divides everything) and the
+    factorisation clause of Definition~\ref{def:is_irreducible} (from
+    $1 = ab$ over $\NN$ one gets $a = b = 1$), so $1$ would be both prime and
+    irreducible.
+  \item $p = 0$ satisfies the divisibility clause as well: $0 \mid ab$ means
+    $ab = 0$, hence $a = 0$ or $b = 0$, i.e.\ $0 \mid a$ or $0 \mid b$. So $0$
+    would be prime.
+\end{itemize}
+With either of those admitted, the factorisation theorem
+(Theorem~\ref{thm:exists_factorization}) is false --- $[1,1,\dots]$ or a list
+containing $0$ would be a legal ``factorisation'' of anything --- and the
+infinitude argument collapses, because its final contradiction is exactly
+$1 < q$ against $q \mid 1$. The condition $1 < p$ also supplies $p \neq 0$,
+which every cancellation step in Chapter~\ref{ch:irreducible} needs.
+
+\begin{definition}[greatest common divisor, by its universal property]
+  \leanok
+  \label{def:is_gcd}
+  \lean{EuclidPrimes.IsGcd}
+  % SOURCE: [euclid-notes], the third `def:` block (read from references/euclid-infinitude-of-primes.md)
+  % SOURCE QUOTE: "def: if a b are naturals, the greatest common divisor gcd(a,b) = d is such that
+  % - d | a
+  % - d | b
+  % - if c | a and c | b then c | d"
+  \textit{Source: euclid-infinitude-of-primes.md, third \texttt{def:} block.}
+  For $a, b, d \in \NN$ we say $d$ is \emph{a} greatest common divisor of $a$
+  and $b$, written $\Gcd{a}{b}{d}$, when
+  \[
+    d \mid a, \qquad d \mid b, \qquad \forall c \in \NN,\ (c \mid a \ \text{and}\ c \mid b) \implies c \mid d .
+  \]
+\end{definition}
+
+Note this is a \emph{relation}, not a function: the source writes
+$\gcd(a,b) = d$, but nothing yet produces such a $d$, and nothing yet says it is
+unique. Existence is Corollary~\ref{cor:exists_is_gcd} and uniqueness is
+Lemma~\ref{lem:is_gcd_unique}, both in Chapter~\ref{ch:bezout}. Until then every
+statement must quantify over ``some $d$ with $\Gcd{a}{b}{d}$''. Observe also
+that the definition places no positivity constraint on $d$, and indeed
+$\Gcd{0}{0}{0}$ holds; that degenerate case is harmless and is never excluded.
+
+\section{A divisor is smaller than what it divides}
+
+\begin{lemma}[strict divisor bound]
+  \leanok
+  \label{lem:dvd_lt_of_ne}
+  \lean{EuclidPrimes.dvd_lt_of_ne}
+  % SOURCE: [euclid-notes], the `lemma:` on distinct naturals greater than 1 (read from references/euclid-infinitude-of-primes.md)
+  % SOURCE QUOTE: "lemma: let a,b be distinct natural numbers greater than 1. If a | b => a < b"
+  \textit{Source: euclid-infinitude-of-primes.md, the third \texttt{lemma:}.}
+  Let $a, b \in \NN$ with $1 < a$, $1 < b$ and $a \neq b$. If $a \mid b$ then
+  $a < b$.
+\end{lemma}
+% SOURCE QUOTE PROOF: "proof: if a | b => exists a c with b = a * c. Since a b distinct, c > 1. Then
+% b - a = a * c - a = a * (c - 1) > 0 => b - a > 0 => b > a"
+\begin{proof}
+
+\leanok
+  The source argues via $b - a = a(c-1) > 0$. Over $\NN$ subtraction is
+  truncated, so ``$b - a > 0$'' is not available as a step --- it is what we are
+  trying to prove. We argue multiplicatively instead, which needs no subtraction
+  at all.
+
+  From $a \mid b$ choose $c \in \NN$ with $b = a c$. We rule out the two small
+  values of $c$:
+  \begin{itemize}
+    \item If $c = 0$ then $b = 0$, contradicting $1 < b$.
+    \item If $c = 1$ then $b = a$, contradicting $a \neq b$.
+  \end{itemize}
+  Hence $2 \le c$. Since $0 < a$, multiplying that inequality by $a$ gives
+  $b = a c \ge 2a = a + a > a$, the last step because $0 < a$. So $a < b$.
+\end{proof}
+
+The next two lemmas package the arithmetic that the factorisation induction
+(Chapter~\ref{ch:factorization}) needs: a non-trivial factor of $n$ is itself
+bigger than $1$, and strictly smaller than $n$.
+
+\begin{lemma}[a non-unit factor exceeds one]
+  \leanok
+  \label{lem:one_lt_factor}
+  \lean{EuclidPrimes.one_lt_factor}
+  Let $n, a, b \in \NN$ with $1 < n$ and $n = a b$. If $a \neq 1$ then $1 < a$.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  If $a = 0$ then $n = 0 \cdot b = 0$, contradicting $1 < n$. So $a \neq 0$, and
+  $a \neq 1$ by hypothesis; for a natural number this leaves exactly $1 < a$.
+\end{proof}
+
+\begin{lemma}[a proper factor is strictly smaller]
+  \leanok
+  \label{lem:factor_lt}
+  \lean{EuclidPrimes.factor_lt}
+  \uses{lem:dvd_lt_of_ne, lem:one_lt_factor}
+  Let $n, a, b \in \NN$ with $1 < n$ and $n = a b$, and suppose $a \neq 1$ and
+  $b \neq 1$. Then $a < n$.
+\end{lemma}
+\begin{proof}
+  \uses{lem:dvd_lt_of_ne, lem:one_lt_factor}
+  \leanok
+  By Lemma~\ref{lem:one_lt_factor} applied to $n = a b$ we get $1 < a$, and
+  applied to $n = b a$ we get $1 < b$.
+
+  Next, $a \neq n$. Indeed, if $a = n$ then $n = n b$; since $1 < n$ gives
+  $0 < n$, cancelling $n$ yields $b = 1$, contradicting $b \neq 1$.
+
+  Finally $a \mid n$, because $n = a b$. Lemma~\ref{lem:dvd_lt_of_ne}, applied
+  with the hypotheses $1 < a$, $1 < n$, $a \neq n$, gives $a < n$.
+\end{proof}
+
+By symmetry of the hypotheses ($n = b a$ with $b \neq 1$ and $a \neq 1$), the
+same lemma also yields $b < n$; no separate statement is needed.
+
+\section{Adequacy of the definitions}
+
+The three predicates of the previous section are project-original in a strong
+sense: the source's versions are defective --- they omit $1 < p$ --- and were
+repaired here. Every later result in this project is a statement \emph{about}
+$\Prm{\cdot}$, so a predicate that was accidentally too weak (satisfied by
+numbers that are not prime) or too strong (failing on numbers that are) would
+leave the whole development literally true and yet about the wrong notion. In
+particular Theorem~\ref{thm:not_exists_prime_list} would still be a theorem.
+
+The four results below close that gap. They pin $\Prm{\cdot}$ from three sides:
+it excludes the units, it excludes a composite, it holds of $2$, and it agrees
+with the divisor condition a reader has in mind. Each is proved \emph{from the
+definitions alone} --- never from the development downstream, which would make
+the check circular --- and none of them is used anywhere else, by design.
+
+\begin{lemma}[units are not prime]
+  \leanok
+  \label{lem:not_is_prime_of_le_one}
+  \lean{EuclidPrimes.not_isPrime_of_le_one}
+  \uses{def:is_prime}
+  Let $p \in \NN$ with $p \le 1$. Then $\Prm{p}$ fails. In particular neither
+  $0$ nor $1$ is prime.
+\end{lemma}
+\begin{proof}
+  \uses{def:is_prime}
+  \leanok
+  The first conjunct of Definition~\ref{def:is_prime} is $1 < p$, which
+  contradicts $p \le 1$ outright.
+
+  This is the formal counterpart of the discussion after
+  Definition~\ref{def:is_irreducible}: both $0$ and $1$ satisfy the divisibility
+  clause, so the exclusion is carried entirely by $1 < p$ and by nothing else.
+\end{proof}
+
+\begin{lemma}[two is prime]
+  \leanok
+  \label{lem:is_prime_two}
+  \lean{EuclidPrimes.isPrime_two}
+  \uses{def:is_prime}
+  $\Prm{2}$ holds.
+\end{lemma}
+\begin{proof}
+  \uses{def:is_prime}
+  \leanok
+  The first conjunct, $1 < 2$, is immediate. For the second, let $a, b \in \NN$
+  with $2 \mid ab$, and suppose $2 \nmid a$; we must produce $2 \mid b$.
+
+  Divisibility by $2$ is the vanishing of the residue mod $2$, so the hypotheses
+  read $ab \bmod 2 = 0$ and $a \bmod 2 \neq 0$; as $a \bmod 2 < 2$, the latter
+  forces $a \bmod 2 = 1$. Residues are multiplicative,
+  \[
+    ab \bmod 2 = \bigl( (a \bmod 2)(b \bmod 2) \bigr) \bmod 2
+      = (b \bmod 2) \bmod 2 = b \bmod 2 ,
+  \]
+  the last step because $b \bmod 2 < 2$. Hence $b \bmod 2 = ab \bmod 2 = 0$,
+  i.e.\ $2 \mid b$.
+
+  Note this is a parity argument and uses nothing but multiplicativity of
+  residues: it does not go through irreducibility, so it does not depend on
+  Chapter~\ref{ch:bezout} or Chapter~\ref{ch:irreducible}. That independence is
+  the point --- a witness that the definition is satisfiable must not rest on the
+  development it is meant to validate.
+\end{proof}
+
+\begin{lemma}[four is not prime]
+  \leanok
+  \label{lem:not_is_prime_four}
+  \lean{EuclidPrimes.not_isPrime_four}
+  \uses{def:is_prime}
+  $\Prm{4}$ fails.
+\end{lemma}
+\begin{proof}
+  \uses{def:is_prime}
+  \leanok
+  Suppose $\Prm{4}$. Since $4 = 2 \cdot 2$ we have $4 \mid 2 \cdot 2$, so the
+  divisibility clause of Definition~\ref{def:is_prime} applied with
+  $a = b = 2$ yields $4 \mid 2$ (either disjunct says exactly that). A positive
+  number is at least as large as any of its divisors, so $4 \le 2$ --- absurd.
+
+  Together with Lemma~\ref{lem:not_is_prime_of_le_one} and
+  Lemma~\ref{lem:is_prime_two} this rules out the two ways the definition could
+  be wrong by inclusion, and exhibits one number it does admit.
+\end{proof}
+
+\begin{lemma}[irreducibility is the condition on divisors]
+  \leanok
+  \label{lem:is_irreducible_iff_forall_dvd}
+  \lean{EuclidPrimes.isIrreducible_iff_forall_dvd}
+  \uses{def:is_irreducible}
+  For $p \in \NN$,
+  \[
+    \Irr{p} \iff \Bigl(1 < p \ \text{ and }\ \forall d \in \NN,\
+      d \mid p \implies (d = 1 \ \text{ or }\ d = p)\Bigr).
+  \]
+\end{lemma}
+\begin{proof}
+  \uses{def:is_irreducible}
+  \leanok
+  The $1 < p$ conjunct is common to both sides, so only the two quantified
+  clauses need relating.
+
+  ($\Rightarrow$) Assume $\Irr{p}$ and let $d \mid p$, say $p = dc$. Applying
+  the factorisation clause to $p = dc$ gives $p = d$ or $p = c$. In the first
+  case $d = p$ and we are done. In the second, substituting $c = p$ into
+  $p = dc$ gives $p = dp$, that is $p \cdot 1 = p \cdot d$; since $1 < p$ gives
+  $p \neq 0$, cancelling $p$ yields $d = 1$.
+
+  ($\Leftarrow$) Assume the divisor condition and let $p = ab$. Then $a \mid p$,
+  so $a = 1$ or $a = p$. If $a = p$ then $p = a$, the left disjunct. If $a = 1$
+  then $p = 1 \cdot b = b$, the right disjunct. (This direction needs no
+  positivity: it never cancels.)
+\end{proof}
+
+\paragraph{What this buys.} The right-hand side of
+Lemma~\ref{lem:is_irreducible_iff_forall_dvd} is the schoolbook definition of a
+prime number: bigger than $1$, and divisible by nothing except $1$ and itself.
+Composing it with Corollary~\ref{cor:prime_iff_irreducible} --- which is where
+the mathematical content of the project's first half sits --- transports that
+characterisation from $\Irr{\cdot}$ to $\Prm{\cdot}$, so the predicate that
+Corollary~\ref{cor:infinite_setOf_prime} proves to have infinitely many
+witnesses is provably the familiar one, and not merely a predicate that
+resembles it. That composition is
+Corollary~\ref{cor:prime_iff_forall_dvd}; it is a stated and proved result of
+Chapter~\ref{ch:irreducible} rather than a remark here, since
+Corollary~\ref{cor:prime_iff_irreducible} is not available this early.
+
+Note the direction of the dependency. Nothing on the path to Euclid's theorem
+uses a lemma of this section: its only consumer anywhere is
+Corollary~\ref{cor:prime_iff_forall_dvd}, and that corollary in turn is used by
+nothing --- every result of
+Chapters~\ref{ch:bezout}--\ref{ch:infinitude} is proved without it. The adequacy
+results are a check on the definitions, never a step in the argument.

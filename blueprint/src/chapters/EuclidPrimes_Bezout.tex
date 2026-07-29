@@ -1,0 +1,202 @@
+\chapter{Existence of gcds, and B\'ezout's identity}
+\label{ch:bezout}
+
+This chapter discharges the one step the informal source leaves open. The source
+records the statement
+
+\begin{quote}
+  \emph{if $a$, $b$ are naturals, there exist $x, y$ integers such that
+  $x a + y b = \gcd(a,b)$}
+\end{quote}
+
+and then says only \texttt{proof: TODO}. The argument below is therefore the
+project's own; there is no source proof to quote. We take the Euclidean-algorithm
+route --- strong induction along $b \bmod a$ --- rather than the
+least-positive-element-of $\{xa + yb\}$ route, because it needs no well-ordering
+setup and produces the gcd and the coefficients in a single recursion.
+
+\section{Coercion discipline}
+
+The source writes $x a + y b = \gcd(a,b)$ without comment, but $a$, $b$ and
+$\gcd(a,b)$ are naturals while $x$ and $y$ are integers. Every statement in this
+project fixes the convention once, here, and every downstream chapter inherits
+it:
+
+\begin{itemize}
+  \item \textbf{The predicates $\Prm{\cdot}$, $\Irr{\cdot}$, $\Gcd{\cdot}{\cdot}{\cdot}$ and
+    every divisibility hypothesis live in $\NN$.} They are never restated over
+    $\ZZ$.
+  \item \textbf{$\ZZ$ appears only for the two B\'ezout coefficients}, and only
+    inside the equation they satisfy. The equation is written with the inclusion
+    $\iota : \NN \to \ZZ$ applied to each natural: $x\iota(a) + y\iota(b) = \iota(d)$.
+  \item \textbf{Crossing back is by the divisibility bridge}: $\iota(m) \mid \iota(n)$
+    in $\ZZ$ implies $m \mid n$ in $\NN$. This is the only bridge
+    Chapter~\ref{ch:irreducible} needs, and it is used exactly once.
+  \item \textbf{Truncated subtraction is never used inside a cast.} Wherever the
+    Euclidean step wants $b - a q$, we instead use the \emph{addition} identity
+    $a \cdot (b \operatorname{div} a) + (b \bmod a) = b$ and transport that
+    equation into $\ZZ$, where subtraction is total. This avoids the defect the
+    source's proof of Lemma~\ref{lem:dvd_lt_of_ne} ran into.
+\end{itemize}
+
+\section{Uniqueness}
+
+\begin{lemma}[a gcd is unique]
+  \leanok
+  \label{lem:is_gcd_unique}
+  \lean{EuclidPrimes.IsGcd.unique}
+  \uses{def:is_gcd}
+  If $\Gcd{a}{b}{d}$ and $\Gcd{a}{b}{d'}$ then $d = d'$.
+\end{lemma}
+\begin{proof}
+  \uses{def:is_gcd}
+  \leanok
+  $d'$ divides $a$ and divides $b$, so the universal clause of $\Gcd{a}{b}{d}$
+  applied to $c := d'$ gives $d' \mid d$. Symmetrically $d \mid d'$. Two natural
+  numbers that divide each other are equal.
+\end{proof}
+
+This is what lets us speak of ``the'' gcd, and it is what will let us upgrade
+B\'ezout from the particular $d$ the construction produces to an arbitrary
+witness.
+
+\section{The Euclidean step}
+
+\begin{lemma}[the Euclidean reduction preserves gcds]
+  \leanok
+  \label{lem:is_gcd_of_mod}
+  \lean{EuclidPrimes.isGcd_of_mod}
+  \uses{def:is_gcd}
+  Let $a, b, d \in \NN$. If $\Gcd{b \bmod a}{a}{d}$ then $\Gcd{a}{b}{d}$.
+
+  No positivity hypothesis is needed. The Euclidean recursion only ever
+  applies this lemma with $0 < a$, but the statement holds for every $a$: at
+  $a = 0$ we have $b \bmod 0 = b$, and the hypothesis $\Gcd{b}{0}{d}$ gives
+  $\Gcd{0}{b}{d}$ by symmetry of the two divisibility clauses.
+\end{lemma}
+\begin{proof}
+  \uses{def:is_gcd}
+  \leanok
+  Write $q := b \operatorname{div} a$ and $r := b \bmod a$, so that
+  \begin{equation}\label{eq:divmod}
+    a q + r = b .
+  \end{equation}
+  (Equation~\eqref{eq:divmod} holds for $a = 0$ as well, with $q = 0$ and
+  $r = b$, so nothing below needs $0 < a$.)
+  We check the three clauses of $\Gcd{a}{b}{d}$, given $d \mid r$, $d \mid a$,
+  and the universal property of $d$ for the pair $(r, a)$.
+  \begin{enumerate}
+    \item $d \mid a$: this is the second clause of the hypothesis.
+    \item $d \mid b$: from $d \mid a$ we get $d \mid a q$, and $d \mid r$, so
+      $d$ divides the sum $a q + r = b$ by \eqref{eq:divmod}.
+    \item Let $c \in \NN$ with $c \mid a$ and $c \mid b$. A divisor of the
+      modulus transports divisibility across the remainder: for any $c \mid a$,
+      $c \mid b \bmod a$ holds exactly when $c \mid b$. (Read left to right this
+      is clause 2 above with $c := d$; read right to left it gives $c \mid r$
+      here. Both directions follow from \eqref{eq:divmod} and $c \mid aq$
+      without ever forming a difference in $\NN$ --- see the coercion
+      discipline: no truncated subtraction anywhere.) So $c \mid r$, and the
+      universal clause of $\Gcd{r}{a}{d}$, applied to this $c$ with $c \mid r$
+      and $c \mid a$, gives $c \mid d$.
+  \end{enumerate}
+\end{proof}
+
+\section{The main construction}
+
+\begin{theorem}[simultaneous existence of a gcd and of B\'ezout coefficients]
+  \leanok
+  \label{thm:exists_is_gcd_bezout}
+  \lean{EuclidPrimes.exists_isGcd_bezout}
+  \uses{def:is_gcd, lem:is_gcd_of_mod}
+  For all $a, b \in \NN$ there exists $d \in \NN$ such that $\Gcd{a}{b}{d}$ and
+  there exist $x, y \in \ZZ$ with $x\iota(a) + y\iota(b) = \iota(d)$.
+\end{theorem}
+\begin{proof}
+  \uses{def:is_gcd, lem:is_gcd_of_mod}
+  \leanok
+  The two conclusions are proved \emph{together}, in one induction. Separating
+  them would force the induction to be run twice, and the second run would have
+  no handle on \emph{which} $d$ the first one produced.
+
+  We argue by strong induction on $a$, with $b$ universally quantified inside
+  the induction hypothesis. So fix $a$ and assume:
+  \[
+    \text{for every } a' < a \text{ and every } b' \in \NN,\ \exists d,\ \Gcd{a'}{b'}{d}
+    \ \text{and}\ \exists x, y \in \ZZ,\ x\iota(a') + y\iota(b') = \iota(d).
+  \]
+
+  \paragraph{Case $a = 0$.} Take $d := b$. Then $\Gcd{0}{b}{b}$ holds: $b \mid 0$
+  since everything divides $0$; $b \mid b$; and if $c \mid 0$ and $c \mid b$ then
+  $c \mid b$. For the coefficients take $x := 0$, $y := 1$, giving
+  $0 \cdot \iota(0) + 1 \cdot \iota(b) = \iota(b)$.
+
+  \paragraph{Case $0 < a$.} Put $q := b \operatorname{div} a$ and
+  $r := b \bmod a$. Since $0 < a$ we have $r < a$, so the induction hypothesis
+  applies to the pair $(r, a)$ --- note the arguments are \emph{swapped}, which
+  is exactly what makes the recursion decrease. It yields $d \in \NN$ with
+  $\Gcd{r}{a}{d}$ and $x, y \in \ZZ$ with
+  \begin{equation}\label{eq:ih}
+    x \iota(r) + y \iota(a) = \iota(d).
+  \end{equation}
+
+  By Lemma~\ref{lem:is_gcd_of_mod} we get $\Gcd{a}{b}{d}$, which is the first
+  conclusion. (That lemma carries no positivity hypothesis; $0 < a$ is needed
+  here only to know $r < a$, which is what makes the recursion decrease.)
+
+  For the second, transport the division identity $a q + r = b$ into $\ZZ$:
+  \[
+    \iota(a)\,\iota(q) + \iota(r) = \iota(b),
+    \qquad\text{hence}\qquad
+    \iota(r) = \iota(b) - \iota(a)\,\iota(q).
+  \]
+  Substituting into \eqref{eq:ih}:
+  \[
+    \iota(d) = x\bigl(\iota(b) - \iota(a)\iota(q)\bigr) + y\,\iota(a)
+             = \bigl(y - x\,\iota(q)\bigr)\iota(a) + x\,\iota(b).
+  \]
+  So the coefficients for the pair $(a, b)$ are
+  \[
+    x' := y - x\,\iota(q), \qquad y' := x ,
+  \]
+  and $x'\iota(a) + y'\iota(b) = \iota(d)$ as required. The manipulation is pure
+  ring algebra in $\ZZ$; no subtraction ever occurs in $\NN$.
+\end{proof}
+
+\section{The two consequences used downstream}
+
+\begin{corollary}[every pair has a gcd]
+  \leanok
+  \label{cor:exists_is_gcd}
+  \lean{EuclidPrimes.exists_isGcd}
+  \uses{def:is_gcd, thm:exists_is_gcd_bezout}
+  For all $a, b \in \NN$ there exists $d \in \NN$ with $\Gcd{a}{b}{d}$.
+\end{corollary}
+\begin{proof}
+  \uses{thm:exists_is_gcd_bezout}
+  \leanok
+  Discard the B\'ezout half of Theorem~\ref{thm:exists_is_gcd_bezout}.
+\end{proof}
+
+\begin{lemma}[B\'ezout, in the form the source states it]
+  \leanok
+  \label{lem:bezout}
+  \lean{EuclidPrimes.bezout}
+  \uses{def:is_gcd, thm:exists_is_gcd_bezout, lem:is_gcd_unique}
+  % SOURCE: [euclid-notes], the first `lemma:` (read from references/euclid-infinitude-of-primes.md)
+  % SOURCE QUOTE: "lemma: if a b are naturals, there exists x,y integers such that x*a + y * b = gcd(a,b)
+  % proof: TODO"
+  \textit{Source: euclid-infinitude-of-primes.md, first \texttt{lemma:} (stated there with \texttt{proof: TODO}).}
+  Let $a, b, d \in \NN$ with $\Gcd{a}{b}{d}$. Then there exist $x, y \in \ZZ$
+  with
+  \[
+    x \cdot \iota(a) + y \cdot \iota(b) = \iota(d) .
+  \]
+\end{lemma}
+\begin{proof}
+  \uses{thm:exists_is_gcd_bezout, lem:is_gcd_unique}
+  \leanok
+  Theorem~\ref{thm:exists_is_gcd_bezout} supplies some $d_0$ with
+  $\Gcd{a}{b}{d_0}$ together with $x, y \in \ZZ$ satisfying
+  $x\iota(a) + y\iota(b) = \iota(d_0)$. By Lemma~\ref{lem:is_gcd_unique} applied
+  to $d_0$ and $d$, we get $d_0 = d$, so the same $x, y$ work for $d$.
+\end{proof}

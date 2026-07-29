@@ -1,0 +1,166 @@
+\chapter{Prime if and only if irreducible}
+\label{ch:irreducible}
+
+This is the mathematical heart of the development, and the only place where
+B\'ezout is consumed. The easy direction is cancellation; the hard direction is
+where the whole of Chapter~\ref{ch:bezout} is spent.
+
+\begin{theorem}[prime implies irreducible]
+  \leanok
+  \label{thm:prime_imp_irreducible}
+  \lean{EuclidPrimes.IsPrime.isIrreducible}
+  \uses{def:is_prime, def:is_irreducible}
+  % SOURCE: [euclid-notes], the second `lemma:`, forward direction (read from references/euclid-infinitude-of-primes.md)
+  % SOURCE QUOTE: "lemma: A natural number p is irreducible iff its prime"
+  \textit{Source: euclid-infinitude-of-primes.md, second \texttt{lemma:}.}
+  If $\Prm{p}$ then $\Irr{p}$.
+\end{theorem}
+% SOURCE QUOTE PROOF: "Suppose p is prime, and p = a * b. Then p | a * b, so p | a or p | b.
+% If p | a then p * k = a => p = (p * k) * b => 1 = k * b => b = 1 => a = p.
+% A similar argument holds for p | b. Hence p is irreducible"
+\begin{proof}
+
+\leanok
+  The condition $1 < p$ is shared by both definitions, so it transfers
+  immediately; only the factorisation clause needs an argument.
+
+  Let $p = a b$. Then $p \mid a b$, since $p \mid p$ and $ab = p$. By
+  $\Prm{p}$, either $p \mid a$ or $p \mid b$.
+
+  Suppose $p \mid a$, say $a = p k$. Substituting into $p = a b$:
+  \[
+    p = (p k) b = p (k b) .
+  \]
+  From $1 < p$ we have $0 < p$, so we may cancel $p$ and obtain $1 = k b$. Over
+  $\NN$ this forces $b = 1$, whence $p = a b = a$. (The cancellation step is
+  precisely where $p \neq 0$ is used, and $p \neq 0$ is available only because
+  we insisted on $1 < p$ in Definition~\ref{def:is_prime}.)
+
+  The case $p \mid b$ is symmetric and gives $p = b$. In either case
+  $p = a$ or $p = b$, which is the factorisation clause of $\Irr{p}$.
+\end{proof}
+
+\begin{theorem}[irreducible implies prime]
+  \leanok
+  \label{thm:irreducible_imp_prime}
+  \lean{EuclidPrimes.IsIrreducible.isPrime}
+  \uses{def:is_prime, def:is_irreducible, def:is_gcd, cor:exists_is_gcd, lem:bezout}
+  % SOURCE: [euclid-notes], the second `lemma:`, reverse direction (read from references/euclid-infinitude-of-primes.md)
+  % SOURCE QUOTE: "lemma: A natural number p is irreducible iff its prime"
+  \textit{Source: euclid-infinitude-of-primes.md, second \texttt{lemma:}.}
+  If $\Irr{p}$ then $\Prm{p}$.
+\end{theorem}
+% SOURCE QUOTE PROOF: "Suppose p is irreduciple, and p | a * b, but not p | a. Let d = gcd(a,p). then p = k * d, so d = 1 or d = p.
+% if d = p, then a = k * p => p | a, contradiciton. So p | b
+%
+% so d = 1, Then exists integers x,y with x * p + y * a = 1 => x * p * b + y * a * b = b. As p divides both summands on the lhs,
+% it divides the sum. Thus p | b."
+\begin{proof}
+  \uses{def:is_gcd, cor:exists_is_gcd, lem:bezout}
+  \leanok
+  Again $1 < p$ transfers directly. For the divisibility clause, let
+  $p \mid a b$. The conclusion $p \mid a \ \text{or}\ p \mid b$ is proved by
+  assuming $p \nmid a$ and deriving $p \mid b$.
+
+  \paragraph{Step 1: a gcd of $a$ and $p$ exists.}
+  By Corollary~\ref{cor:exists_is_gcd} choose $d$ with $\Gcd{a}{p}{d}$.
+
+  \paragraph{Step 2: $d = 1$.}
+  Since $d \mid p$, write $p = d k$ for some $k \in \NN$. Applying $\Irr{p}$ to
+  this factorisation gives $p = d$ or $p = k$.
+  \begin{itemize}
+    \item If $p = d$: then, since $d \mid a$, we get $p \mid a$, contradicting
+      $p \nmid a$. So this case cannot occur. (The source's transcription reads
+      ``\texttt{if d = p, then a = k * p => p | a, contradiciton. So p | b}''; the
+      trailing clause is a slip --- what this branch establishes is that it is
+      \emph{impossible}, not that $p \mid b$.)
+    \item If $p = k$: then $p = d k = d p$. From $1 < p$ we have $0 < p$, so
+      cancelling $p$ gives $d = 1$.
+  \end{itemize}
+  Hence $d = 1$.
+
+  \paragraph{Step 3: B\'ezout, multiplied through by $b$.}
+  Since $\Gcd{a}{p}{1}$, Lemma~\ref{lem:bezout} supplies
+  $x, y \in \ZZ$ with
+  \[
+    x\,\iota(a) + y\,\iota(p) = \iota(1) = 1 .
+  \]
+  Multiply both sides by $\iota(b)$:
+  \begin{equation}\label{eq:bezout_times_b}
+    x\,\iota(a)\iota(b) + y\,\iota(p)\iota(b) = \iota(b) .
+  \end{equation}
+
+  \paragraph{Step 4: $\iota(p)$ divides both summands.}
+  The second summand is visibly a multiple of $\iota(p)$. For the first: the
+  hypothesis $p \mid a b$ holds in $\NN$, and the inclusion $\iota$ preserves
+  divisibility, so $\iota(p) \mid \iota(a)\iota(b)$ and therefore
+  $\iota(p) \mid x\,\iota(a)\iota(b)$. Being a divisor of both summands,
+  $\iota(p)$ divides their sum, which by \eqref{eq:bezout_times_b} is
+  $\iota(b)$.
+
+  \paragraph{Step 5: cross back to $\NN$.}
+  From $\iota(p) \mid \iota(b)$ in $\ZZ$ we conclude $p \mid b$ in $\NN$, by the
+  divisibility bridge fixed in Chapter~\ref{ch:bezout}. This is the only place in
+  the project where the bridge is used.
+\end{proof}
+
+\begin{corollary}[the two notions coincide]
+  \leanok
+  \label{cor:prime_iff_irreducible}
+  \lean{EuclidPrimes.isPrime_iff_isIrreducible}
+  \uses{def:is_prime, def:is_irreducible, thm:prime_imp_irreducible, thm:irreducible_imp_prime}
+  For every $p \in \NN$: $\Prm{p}$ if and only if $\Irr{p}$.
+\end{corollary}
+\begin{proof}
+  \uses{thm:prime_imp_irreducible, thm:irreducible_imp_prime}
+  \leanok
+  Combine Theorem~\ref{thm:prime_imp_irreducible} and
+  Theorem~\ref{thm:irreducible_imp_prime}.
+\end{proof}
+
+\section{The schoolbook characterisation of primality}
+\label{sec:prime_iff_forall_dvd}
+
+Corollary~\ref{cor:prime_iff_irreducible} is the last ingredient needed to
+identify the project's $\Prm{\cdot}$ with the definition of a prime number a
+reader already has: bigger than $1$, and divisible by nothing except $1$ and
+itself. Lemma~\ref{lem:is_irreducible_iff_forall_dvd} put $\Irr{\cdot}$ in that
+form; composing the two transports it to $\Prm{\cdot}$.
+
+The corollary is recorded here, and not in Chapter~\ref{ch:basic} alongside the
+other adequacy results, purely because of the direction of the dependency: it
+consumes Corollary~\ref{cor:prime_iff_irreducible}, which is proved in this
+chapter, so it cannot be stated any earlier. It is stated as a result rather
+than left as a sentence of prose for the same reason
+\S\ref{sec:exponent_form} of Chapter~\ref{ch:factorization} exists: a
+restatement of a result in another shape is only established when the
+translation is itself proved.
+
+\begin{corollary}[primality is the condition on divisors]
+  \leanok
+  \label{cor:prime_iff_forall_dvd}
+  \lean{EuclidPrimes.isPrime_iff_forall_dvd}
+  \uses{def:is_prime, cor:prime_iff_irreducible, lem:is_irreducible_iff_forall_dvd}
+  For $p \in \NN$,
+  \[
+    \Prm{p} \iff \Bigl(1 < p \ \text{ and }\ \forall d \in \NN,\
+      d \mid p \implies (d = 1 \ \text{ or }\ d = p)\Bigr).
+  \]
+\end{corollary}
+\begin{proof}
+  \uses{cor:prime_iff_irreducible, lem:is_irreducible_iff_forall_dvd}
+  \leanok
+  Chain the two equivalences: $\Prm{p} \iff \Irr{p}$ by
+  Corollary~\ref{cor:prime_iff_irreducible}, and $\Irr{p}$ is equivalent to the
+  displayed divisor condition by
+  Lemma~\ref{lem:is_irreducible_iff_forall_dvd}. Transitivity of $\iff$ gives
+  the claim; no new mathematical content is involved.
+\end{proof}
+
+Consequently the predicate that Corollary~\ref{cor:infinite_setOf_prime} proves
+to have infinitely many witnesses is provably the familiar one. Note that no
+result of this chapter's first two sections, and nothing in
+Chapter~\ref{ch:factorization} or Chapter~\ref{ch:infinitude}, depends on this
+corollary: it is downstream of the entire development, so identifying
+$\Prm{\cdot}$ with the schoolbook condition cannot have been used to prove
+anything about it.

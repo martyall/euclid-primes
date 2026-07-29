@@ -1,0 +1,38 @@
+name: Lean Action CI
+
+# Builds the Lean development on every push and pull request.
+#
+# Publishing the blueprint and the API docs is a separate workflow
+# (blueprint.yml) so that only the default branch deploys to GitHub Pages.
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+# Don't keep building superseded commits on the same branch or PR.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v5
+
+      # Installs the toolchain pinned in lean-toolchain, restores the Mathlib
+      # olean cache (`lake exe cache get`) plus the GitHub Actions build cache,
+      # then runs `lake build`. `lake test`/`lake lint` are skipped unless the
+      # lakefile declares those targets.
+      - name: Build project
+        uses: leanprover/lean-action@v1
+        with:
+          build: true
+          use-github-cache: true

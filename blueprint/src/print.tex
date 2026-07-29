@@ -1,0 +1,29 @@
+% This file makes the printable (pdf) version of the blueprint, built with
+% `leanblueprint pdf` (output in blueprint/print/print.pdf). It is compiled
+% with xelatex, hence unicode-math / Latin Modern Math.
+%
+% Note: macros/common.tex is *not* \input here — content.tex pulls it in
+% itself, so inputting it again would redefine every macro.
+
+\documentclass[a4paper]{report}
+
+\usepackage{geometry}
+
+\usepackage{expl3}
+
+\usepackage{amssymb, amsthm, mathtools}
+\usepackage[unicode,colorlinks=true,linkcolor=blue,urlcolor=magenta, citecolor=blue]{hyperref}
+
+\usepackage[warnings-off={mathtools-colon,mathtools-overbracket}]{unicode-math}
+
+\input{macros/theorems}
+\input{macros/print}
+
+\title{Euclid's Theorem from First Principles}
+\author{Martin Allen}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\input{content}
+\end{document}

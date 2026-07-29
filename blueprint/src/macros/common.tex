@@ -1,0 +1,10 @@
+% Macros shared by every chapter. Define here BEFORE use.
+
+\newcommand{\NN}{\mathbb{N}}
+\newcommand{\ZZ}{\mathbb{Z}}
+
+% The three project-local predicates. They are deliberately NOT Mathlib's
+% `Nat.Prime` / `Irreducible` / `Nat.gcd`: this project defines them itself.
+\newcommand{\Prm}[1]{\mathrm{Prime}(#1)}
+\newcommand{\Irr}[1]{\mathrm{Irred}(#1)}
+\newcommand{\Gcd}[3]{\mathrm{Gcd}(#1,#2;#3)}

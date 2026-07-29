@@ -1,0 +1,96 @@
+\chapter{There are infinitely many primes}
+\label{ch:infinitude}
+
+\section{The source's argument, stated so that it is true}
+
+The source argues by contradiction from ``there are only finitely many primes
+$p_1 \dots p_n$'', forms $m = \prod_i p_i$, and factors $m + 1$. Formalising
+this needs two things the source leaves implicit.
+
+\begin{itemize}
+  \item \textbf{$1 < m + 1$ must be discharged} before
+    Corollary~\ref{cor:exists_prime_dvd} applies, i.e.\ $m \neq 0$. This is
+    \emph{not} automatic for an arbitrary list: a list that merely
+    \emph{contains} every prime could also contain $0$, and then $m = 0$ and
+    $m + 1 = 1$ has no prime divisor at all. We therefore hypothesise that the
+    list contains \emph{only} primes as well as \emph{all} primes. Since every
+    prime is $> 1 > 0$, the product of such a list is positive.
+  \item \textbf{The contradiction is $q \mid 1$ against $1 < q$}, so it is again
+    the $1 < p$ conjunct of Definition~\ref{def:is_prime} that carries the
+    argument. Without it the proof has no contradiction to reach.
+\end{itemize}
+
+\begin{theorem}[no list contains exactly the primes]
+  \leanok
+  \label{thm:not_exists_prime_list}
+  \lean{EuclidPrimes.not_exists_isPrime_list}
+  \uses{def:is_prime, cor:exists_prime_dvd}
+  % SOURCE: [euclid-notes], the final `theorem:` (read from references/euclid-infinitude-of-primes.md)
+  % SOURCE QUOTE: "theorem: There are inifinitely many primes."
+  \textit{Source: euclid-infinitude-of-primes.md, final \texttt{theorem:}.}
+  There is no finite list $\ell$ of natural numbers such that
+  \[
+    (\forall p \in \ell,\ \Prm{p}) \quad\text{and}\quad (\forall p,\ \Prm{p} \implies p \in \ell).
+  \]
+\end{theorem}
+% SOURCE QUOTE PROOF: "Suppose there are only finitely many primes p1...pn. let m = (\prod_{i=1}^{n} p_i). Then n admits a prime factorization
+%
+%   m + 1 = \Product_{j=1}^{k} p_j ^ e_j
+%
+% . Then for all p_j, p_j | m + 1, p_j | m => m_j | 1, contradiction."
+\begin{proof}
+  \uses{cor:exists_prime_dvd}
+  \leanok
+  Suppose such an $\ell$ exists, and set $m := \prod \ell$.
+
+  \paragraph{Step 1: $0 < m$, hence $1 < m + 1$.}
+  Every member of $\ell$ is prime by the first hypothesis, hence $> 1$ and in
+  particular $> 0$. A product of positive naturals is positive, so $0 < m$ and
+  therefore $1 < m + 1$.
+
+  \paragraph{Step 2: $m + 1$ has a prime divisor.}
+  By Corollary~\ref{cor:exists_prime_dvd} applied to $m + 1$ --- legitimate
+  exactly because of Step 1 --- there is $q$ with $\Prm{q}$ and $q \mid m + 1$.
+
+  \paragraph{Step 3: $q$ also divides $m$.}
+  By the second hypothesis, $\Prm{q}$ gives $q \in \ell$, and any member of a
+  list divides that list's product, so $q \mid m$.
+
+  \paragraph{Step 4: contradiction.}
+  $q$ divides both $m + 1$ and $m$, hence divides their difference
+  $(m+1) - m = 1$. A divisor of $1$ is at most $1$, contradicting $1 < q$ from
+  $\Prm{q}$.
+\end{proof}
+
+\section{The theorem in its usual forms}
+
+\begin{corollary}[the set of primes is infinite]
+  \leanok
+  \label{cor:infinite_setOf_prime}
+  \lean{EuclidPrimes.infinite_setOf_isPrime}
+  \uses{def:is_prime, thm:not_exists_prime_list}
+  The set $\{\, p \in \NN \mid \Prm{p} \,\}$ is infinite.
+\end{corollary}
+\begin{proof}
+  \uses{thm:not_exists_prime_list}
+  \leanok
+  Suppose it were finite. A finite set of natural numbers can be enumerated as a
+  finite list $\ell$ whose members are exactly its elements. That $\ell$ then
+  satisfies both hypotheses of Theorem~\ref{thm:not_exists_prime_list}: its
+  members are primes, and every prime, being an element of the set, occurs in
+  it. This contradicts the theorem.
+\end{proof}
+
+\begin{corollary}[primes are unbounded]
+  \leanok
+  \label{cor:exists_prime_gt}
+  \lean{EuclidPrimes.exists_isPrime_gt}
+  \uses{def:is_prime, cor:infinite_setOf_prime}
+  For every $n \in \NN$ there exists $p$ with $\Prm{p}$ and $n < p$.
+\end{corollary}
+\begin{proof}
+  \uses{cor:infinite_setOf_prime}
+  \leanok
+  An infinite set of natural numbers contains an element greater than any given
+  $n$; apply this to Corollary~\ref{cor:infinite_setOf_prime}.
+\end{proof}
