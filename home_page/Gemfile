@@ -1,5 +1,12 @@
 source "https://rubygems.org"
 
+# Deliberately unlocked: there is no Gemfile.lock. leanblueprint ships one that
+# pins nokogiri 1.13.6, which requires Ruby < 3.2, while docgen-action builds
+# this site on Ruby 3.4 — bundler then refuses to install. Without a lockfile
+# ruby/setup-ruby resolves fresh (github-pages 232 wants nokogiri >= 1.16.2)
+# and generates its own lock for caching. Commit a lock only if you regenerate
+# it on Ruby 3.4.
+#
 # To upgrade, run `bundle update github-pages`.
 gem "github-pages", group: :jekyll_plugins
 # If you have any plugins, put them here!
