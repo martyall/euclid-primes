@@ -24,3 +24,18 @@ div.proof_content {
 	border-left: .08rem solid grey;
 }
 
+/* leanblueprint always renders a "Lean" link per \lean{...} declaration, and
+ * always points it at {dochome}/find/#doc/<decl>. This project publishes no
+ * doc-gen4 API docs (see .github/workflows/blueprint.yml), so those links have
+ * no target — hide them rather than ship dead links. The declarations are still
+ * checked by `lake exe checkdecls` and still colour the dependency graph.
+ * If you enable api-docs, delete these two rules and restore \dochome. */
+a.lean_link,
+span.lean_link {
+	display: none;
+}
+
+button.modal.lean {
+	display: none;
+}
+

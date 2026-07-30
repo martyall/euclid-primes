@@ -3,7 +3,6 @@
 [![CI](https://github.com/martyall/euclid-primes/actions/workflows/lean_action_ci.yml/badge.svg)](https://github.com/martyall/euclid-primes/actions/workflows/lean_action_ci.yml)
 [![Blueprint](https://img.shields.io/badge/blueprint-web-blue)](https://martyall.github.io/euclid-primes/blueprint/)
 [![Blueprint PDF](https://img.shields.io/badge/blueprint-pdf-blue)](https://martyall.github.io/euclid-primes/blueprint.pdf)
-[![Docs](https://img.shields.io/badge/docs-API-blue)](https://martyall.github.io/euclid-primes/docs/)
 
 <!-- archon:readme -->
 <!-- Claude fills in the prose sections below. Keep the section headers. -->
@@ -54,10 +53,11 @@ to `main`:
 | Blueprint (web) | <https://martyall.github.io/euclid-primes/blueprint/> |
 | Blueprint (pdf) | <https://martyall.github.io/euclid-primes/blueprint.pdf> |
 | Dependency graph | <https://martyall.github.io/euclid-primes/blueprint/dep_graph_document.html> |
-| API documentation | <https://martyall.github.io/euclid-primes/docs/> |
 
-In the web version each statement's **Lean** link opens that declaration in the
-API docs, whose header links on to its source line on GitHub.
+CI does not publish doc-gen4 API documentation. Since every module here does
+`import Mathlib`, doc-gen4 would have to document the whole of Mathlib — over an
+hour of build on a cold cache. `.github/workflows/blueprint.yml` documents how
+to turn it back on.
 
 ## How to build
 

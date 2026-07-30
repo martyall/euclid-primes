@@ -15,7 +15,13 @@
 
 \home{https://martyall.github.io/euclid-primes}
 \github{https://github.com/martyall/euclid-primes}
-\dochome{https://martyall.github.io/euclid-primes/docs}
+% No \dochome: this project does not publish doc-gen4 API docs, so there is
+% nowhere for a \lean{...} link to point. leanblueprint would otherwise build
+% those links against Mathlib's doc site, where this project's declarations do
+% not exist, so extra_styles.css hides them. If you ever enable api-docs in
+% .github/workflows/blueprint.yml, restore
+%   \dochome{https://martyall.github.io/euclid-primes/docs}
+% and drop that CSS rule.
 
 \title{Euclid's Theorem from First Principles}
 \author{Martin Allen}

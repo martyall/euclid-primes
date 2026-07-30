@@ -6,7 +6,6 @@ name: Compile and deploy blueprint
 #   https://martyall.github.io/euclid-primes/            landing page (home_page/)
 #   https://martyall.github.io/euclid-primes/blueprint/  blueprint, web version
 #   https://martyall.github.io/euclid-primes/blueprint.pdf
-#   https://martyall.github.io/euclid-primes/docs/       doc-gen4 API docs
 #
 # Pages must be configured once, by hand: Settings > Pages > Build and
 # deployment > Source > "GitHub Actions".
@@ -49,8 +48,6 @@ jobs:
       - name: Checkout project
         uses: actions/checkout@v5
         with:
-          # doc-gen4 derives its "source" links from the git history, so the
-          # full history is needed for them to point at the right commit.
           fetch-depth: 0
 
       # Installs the pinned toolchain, restores the Mathlib olean cache and the
@@ -65,10 +62,17 @@ jobs:
       #   * compiles blueprint/src/print.tex with xelatex   -> blueprint.pdf
       #   * runs plasTeX over blueprint/src/web.tex          -> blueprint/
       #   * checks every \lean{...} declaration exists (`lake exe checkdecls`)
-      #   * runs doc-gen4                                    -> docs/
       #   * builds home_page/ with Jekyll and deploys to Pages
-      - name: Compile blueprint and documentation, deploy to Pages
+      #
+      # api-docs is off on purpose. doc-gen4 emits documentation for every
+      # module in the import closure, and each EuclidPrimes file does
+      # `import Mathlib`, so turning it on means building docs for the whole of
+      # Mathlib — over an hour on a cold cache, for output this project does
+      # not publish. Turning it back on also means restoring the /docs links in
+      # home_page/ and README.md, and \dochome in blueprint/src/web.tex.
+      - name: Compile blueprint, deploy to Pages
         uses: leanprover-community/docgen-action@main
         with:
           blueprint: true
+          api-docs: false
           homepage: home_page

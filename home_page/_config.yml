@@ -2,9 +2,9 @@
 #
 # This folder is built by .github/workflows/blueprint.yml and becomes the root
 # of https://martyall.github.io/euclid-primes/ . CI copies the blueprint (web +
-# pdf) and the doc-gen4 API docs into it before running Jekyll, so they end up
-# served at /blueprint/, /blueprint.pdf and /docs/. Do not add `blueprint` or
-# `docs` to `exclude`: Jekyll has to copy them into _site verbatim.
+# pdf) into it before running Jekyll, so they end up served at /blueprint/ and
+# /blueprint.pdf. Do not add `blueprint` to `exclude`: Jekyll has to copy it
+# into _site verbatim.
 
 title: Euclid's Theorem from First Principles
 description: A Lean 4 formalization of the infinitude of the primes, built from first principles
